@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépenses de Noël 🎄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header .emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .auth-status.connected {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-card .amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .type-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .type-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .type-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .conditional-field {
+            display: none;
+        }
+
+        .conditional-field.show {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">🎄</div>
+            <h1>Dépenses de Noël</h1>
+            <p>Suivez vos achats en temps réel</p>
+        </div>
+
+        <div class="auth-section">
+            <button id="authorizeBtn" class="auth-btn">🔐 Connexion Google Sheets</button>
+            <div id="authStatus" class="auth-status">Non connecté</div>
+        </div>
+
+        <div class="summary">
+            <div class="summary-card">
+                <h3>🍽️ Repas</h3>
+                <div class="amount" id="repasTotal">0,00 €</div>
+            </div>
+            <div class="summary-card">
+                <h3>🎁 Cadeaux</h3>
+                <div class="amount" id="cadeauxTotal">0,00 €</div>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="form-card">
+            <form id="expenseForm">
+                <div class="type-selector">
+                    <button type="button" class="type-btn active" data-type="repas">
+                        🍽️ Repas
+                    </button>
+                    <button type="button" class="type-btn" data-type="cadeaux">
+                        🎁 Cadeaux
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="achat">Description de l'achat *</label>
+                    <input type="text" id="achat" required placeholder="Ex: Foie gras">
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date *</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="montant">Montant (€) *</label>
+                    <input type="number" id="montant" step="0.01" required placeholder="0.00">
+                </div>
+
+                <!-- Champ conditionnel pour les cadeaux -->
+                <div class="form-group conditional-field" id="pourQuiField">
+                    <label for="pourQui">Pour qui ? *</label>
+                    <input type="text" id="pourQui" placeholder="Ex: Maman, Papa, etc.">
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    ➕ Ajouter la dépense
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google API -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+
+    <script>
+        // ============================================================================
+        // CONFIGURATION - À PERSONNALISER
+        // ============================================================================
+        
+        const CONFIG = {
+            // Votre Client ID OAuth 2.0
+            CLIENT_ID: '923968287944-9rhp5n2q6b5t5au3m22ia5f2vi1hnuj8.apps.googleusercontent.com',
+            
+            // Votre clé API
+            API_KEY: 'AIzaSyBXMz-joigXR0FCOfsful6dB7jSfYHJWL8',
+            
+            // ID de votre Google Sheets
+            SPREADSHEET_ID: '1RRdNPgHuAo7zMR73xvM-6wgyl2m_1Kuu8ViD936K4tI',
+            
+            // Noms des feuilles
+            SHEETS: {
+                repas: 'Courses réveillon',
+                cadeaux: 'Cadeaux'
+            },
+            
+            // Nombre de personnes pour le calcul du coût par personne
+            NB_PERSONNES: 15
+        };
+
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+        // ============================================================================
+        // ÉTAT DE L'APPLICATION
+        // ============================================================================
+        
+        let gapiInited = false;
+        let gisInited = false;
+        let tokenClient;
+        let currentType = 'repas';
+        let totals = { repas: 0, cadeaux: 0 };
+
+        // ============================================================================
+        // INITIALISATION
+        // ============================================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+
+            setupTypeButtons();
+            setupForm();
+            gapiLoaded();
+            gisLoaded();
+        });
+
+        // Chargement de l'API Google
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            await gapi.client.init({
+                apiKey: CONFIG.API_KEY,
+                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+            });
+            gapiInited = true;
+            maybeEnableButtons();
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // défini plus tard
+            });
+            gisInited = true;
+            maybeEnableButtons();
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                document.getElementById('authorizeBtn').disabled = false;
+            }
+        }
+
+        // ============================================================================
+        // AUTHENTIFICATION
+        // ============================================================================
+
+        document.getElementById('authorizeBtn').addEventListener('click', handleAuthClick);
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    throw (resp);
+                }
+                document.getElementById('authStatus').textContent = '✅ Connecté à Google Sheets';
+                document.getElementById('authStatus').classList.add('connected');
+                document.getElementById('authorizeBtn').textContent = '✓ Connecté';
+                
+                // Charger les totaux existants
+                await loadTotals();
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        // ============================================================================
+        // GESTION DES TYPES (REPAS / CADEAUX)
+        // ============================================================================
+
+        function setupTypeButtons() {
+            const typeButtons = document.querySelectorAll('.type-btn');
+            const pourQuiField = document.getElementById('pourQuiField');
+            const pourQuiInput = document.getElementById('pourQui');
+            
+            typeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    typeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentType = btn.dataset.type;
+
+                    // Afficher/masquer le champ "Pour qui" selon le type
+                    if (currentType === 'cadeaux') {
+                        pourQuiField.classList.add('show');
+                        pourQuiInput.required = true;
+                    } else {
+                        pourQuiField.classList.remove('show');
+                        pourQuiInput.required = false;
+                        pourQuiInput.value = '';
+                    }
+                });
+            });
+        }
+
+        // ============================================================================
+        // CHARGEMENT DES TOTAUX EXISTANTS
+        // ============================================================================
+
+        async function loadTotals() {
+            try {
+                // Charger le total des repas
+                const repasResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEETS.repas}!D:D`,
+                });
+                const repasValues = repasResponse.result.values || [];
+                if (repasValues.length > 1) {
+                    const lastTotal = repasValues[repasValues.length - 1][0];
+                    totals.repas = parseFloat(lastTotal.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+                }
+
+                // Charger le total des cadeaux
+                const cadeauxResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEETS.cadeaux}!D:D`,
+                });
+                const cadeauxValues = cadeauxResponse.result.values || [];
+                if (cadeauxValues.length > 1) {
+                    const lastTotal = cadeauxValues[cadeauxValues.length - 1][0];
+                    totals.cadeaux = parseFloat(lastTotal.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+                }
+
+                updateTotalDisplay();
+            } catch (error) {
+                console.error('Erreur lors du chargement des totaux:', error);
+            }
+        }
+
+        // ============================================================================
+        // GESTION DU FORMULAIRE
+        // ============================================================================
+
+        function setupForm() {
+            const form = document.getElementById('expenseForm');
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (gapi.client.getToken() === null) {
+                    showMessage('❌ Veuillez vous connecter à Google Sheets d\'abord', 'error');
+                    return;
+                }
+
+                const achat = document.getElementById('achat').value;
+                const date = document.getElementById('date').value;
+                const montant = parseFloat(document.getElementById('montant').value);
+                const pourQui = document.getElementById('pourQui').value;
+
+                if (!achat || !date || isNaN(montant)) {
+                    showMessage('❌ Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                if (currentType === 'cadeaux' && !pourQui) {
+                    showMessage('❌ Veuillez indiquer pour qui est ce cadeau', 'error');
+                    return;
+                }
+
+                await addExpense(achat, date, montant, pourQui);
+            });
+        }
+
+        // ============================================================================
+        // AJOUT D'UNE DÉPENSE DANS GOOGLE SHEETS
+        // ============================================================================
+
+        async function addExpense(achat, dateStr, montant, pourQui) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Ajout en cours...';
+
+            try {
+                // Formatage de la date (DD/MM/YYYY)
+                const [year, month, day] = dateStr.split('-');
+                const formattedDate = `${day}/${month}/${year}`;
+
+                // Calcul du nouveau total
+                totals[currentType] += montant;
+                const newTotal = totals[currentType];
+
+                // Préparation des données selon le type
+                let values;
+                let sheetName = CONFIG.SHEETS[currentType];
+
+                if (currentType === 'repas') {
+                    // Structure pour "Courses réveillon": ACHAT | DATE | MONTANT | TOTAL | COUT/PERS
+                    const coutParPersonne = newTotal / CONFIG.NB_PERSONNES;
+                    values = [[
+                        achat,
+                        formattedDate,
+                        `${montant.toFixed(2).replace('.', ',')} €`,
+                        `${newTotal.toFixed(2).replace('.', ',')} €`,
+                        `${coutParPersonne.toFixed(2).replace('.', ',')} €`
+                    ]];
+                } else {
+                    // Structure pour "Cadeaux": ACHAT | DATE | MONTANT | TOTAL | POUR QUI
+                    values = [[
+                        achat,
+                        formattedDate,
+                        `${montant.toFixed(2).replace('.', ',')} €`,
+                        `${newTotal.toFixed(2).replace('.', ',')} €`,
+                        pourQui
+                    ]];
+                }
+
+                // Ajout de la ligne dans Google Sheets
+                const response = await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A:E`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: { values: values }
+                });
+
+                // Mise à jour de l'interface
+                updateTotalDisplay();
+                
+                // Message de succès
+                const sheetLabel = currentType === 'repas' ? 'Courses réveillon' : 'Cadeaux';
+                showMessage(`✅ Dépense ajoutée avec succès dans "${sheetLabel}" !`, 'success');
+                
+                // Réinitialisation du formulaire
+                document.getElementById('expenseForm').reset();
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('date').value = today;
+
+            } catch (error) {
+                console.error('Erreur lors de l\'ajout:', error);
+                showMessage('❌ Erreur lors de l\'ajout de la dépense: ' + error.message, 'error');
+                // Annuler l'ajout au total en cas d'erreur
+                totals[currentType] -= montant;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '➕ Ajouter la dépense';
+            }
+        }
+
+        // ============================================================================
+        // INTERFACE UTILISATEUR
+        // ============================================================================
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 5000);
+        }
+
+        function updateTotalDisplay() {
+            document.getElementById('repasTotal').textContent = 
+                totals.repas.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('cadeauxTotal').textContent = 
+                totals.cadeaux.toFixed(2).replace('.', ',') + ' €';
+        }
+    </script>
+</body>
+</html>
