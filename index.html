@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépenses de Noël 🎄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header .emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .auth-status.connected {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-card .amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .tab-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            border-color: white;
+        }
+
+        .expenses-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .expenses-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .expenses-header h2 {
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        .refresh-btn {
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #e9ecef;
+        }
+
+        .expenses-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .expense-item {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+
+        .expense-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .expense-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .expense-amount {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .expense-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .expense-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .expense-extra {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .type-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .type-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .type-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .conditional-field {
+            display: none;
+        }
+
+        .conditional-field.show {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar personnalisée */
+        .expenses-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .expenses-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .expenses-list::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .expenses-list::-webkit-scrollbar-thumb:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .expense-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .expense-details {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">🎄</div>
+            <h1>Dépenses de Noël</h1>
+            <p>Suivez vos achats en temps réel</p>
+        </div>
+
+        <div class="auth-section">
+            <button id="authorizeBtn" class="auth-btn">🔐 Connexion Google Sheets</button>
+            <div id="authStatus" class="auth-status">Non connecté</div>
+        </div>
+
+        <div class="summary">
+            <div class="summary-card">
+                <h3>🍽️ Repas</h3>
+                <div class="amount" id="repasTotal">0,00 €</div>
+            </div>
+            <div class="summary-card">
+                <h3>🎁 Cadeaux</h3>
+                <div class="amount" id="cadeauxTotal">0,00 €</div>
+            </div>
+        </div>
+
+        <div class="tab-selector">
+            <button class="tab-btn active" data-view="repas">
+                🍽️ Voir les repas
+            </button>
+            <button class="tab-btn" data-view="cadeaux">
+                🎁 Voir les cadeaux
+            </button>
+        </div>
+
+        <div class="expenses-card">
+            <div class="expenses-header">
+                <h2 id="expensesTitle">📋 Dépenses Repas</h2>
+                <button class="refresh-btn" id="refreshBtn">🔄 Actualiser</button>
+            </div>
+            <div id="expensesList" class="expenses-list">
+                <div class="loading">
+                    Connectez-vous pour voir vos dépenses...
+                </div>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="form-card">
+            <form id="expenseForm">
+                <div class="type-selector">
+                    <button type="button" class="type-btn active" data-type="repas">
+                        🍽️ Repas
+                    </button>
+                    <button type="button" class="type-btn" data-type="cadeaux">
+                        🎁 Cadeaux
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="achat">Description de l'achat *</label>
+                    <input type="text" id="achat" required placeholder="Ex: Foie gras">
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date *</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="montant">Montant (€) *</label>
+                    <input type="number" id="montant" step="0.01" required placeholder="0.00">
+                </div>
+
+                <div class="form-group conditional-field" id="pourQuiField">
+                    <label for="pourQui">Pour qui ? *</label>
+                    <input type="text" id="pourQui" placeholder="Ex: Maman, Papa, etc.">
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    ➕ Ajouter la dépense
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google API -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+
+    <script>
+        // ============================================================================
+        // CONFIGURATION - À PERSONNALISER
+        // ============================================================================
+        
+        const CONFIG = {
+            CLIENT_ID: '923968287944-9rhp5n2q6b5t5au3m22ia5f2vi1hnuj8.apps.googleusercontent.com',
+            API_KEY: 'AIzaSyBXMz-joigXR0FCOfsful6dB7jSfYHJWL8',
+            SPREADSHEET_ID: '1RRdNPgHuAo7zMR73xvM-6wgyl2m_1Kuu8ViD936K4tI',
+            SHEETS: {
+                repas: 'Courses réveillon',
+                cadeaux: 'Cadeaux'
+            },
+            NB_PERSONNES: 15
+        };
+
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+        // ============================================================================
+        // ÉTAT DE L'APPLICATION
+        // ============================================================================
+        
+        let gapiInited = false;
+        let gisInited = false;
+        let tokenClient;
+        let currentType = 'repas';
+        let currentView = 'repas';
+        let totals = { repas: 0, cadeaux: 0 };
+        let expenses = { repas: [], cadeaux: [] };
+
+        // ============================================================================
+        // INITIALISATION
+        // ============================================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+
+            setupTypeButtons();
+            setupTabButtons();
+            setupForm();
+            setupRefreshButton();
+            gapiLoaded();
+            gisLoaded();
+        });
+
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            await gapi.client.init({
+                apiKey: CONFIG.API_KEY,
+                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+            });
+            gapiInited = true;
+            maybeEnableButtons();
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: SCOPES,
+                callback: '',
+            });
+            gisInited = true;
+            maybeEnableButtons();
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                document.getElementById('authorizeBtn').disabled = false;
+            }
+        }
+
+        // ============================================================================
+        // AUTHENTIFICATION
+        // ============================================================================
+
+        document.getElementById('authorizeBtn').addEventListener('click', handleAuthClick);
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    throw (resp);
+                }
+                document.getElementById('authStatus').textContent = '✅ Connecté à Google Sheets';
+                document.getElementById('authStatus').classList.add('connected');
+                document.getElementById('authorizeBtn').textContent = '✓ Connecté';
+                
+                await loadAllData();
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        // ============================================================================
+        // GESTION DES ONGLETS
+        // ============================================================================
+
+        function setupTabButtons() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentView = btn.dataset.view;
+                    updateExpensesDisplay();
+                });
+            });
+        }
+
+        function setupRefreshButton() {
+            document.getElementById('refreshBtn').addEventListener('click', async () => {
+                if (gapi.client.getToken() !== null) {
+                    await loadAllData();
+                    showMessage('✅ Données actualisées', 'success');
+                }
+            });
+        }
+
+        // ============================================================================
+        // GESTION DES TYPES (REPAS / CADEAUX)
+        // ============================================================================
+
+        function setupTypeButtons() {
+            const typeButtons = document.querySelectorAll('.type-btn');
+            const pourQuiField = document.getElementById('pourQuiField');
+            const pourQuiInput = document.getElementById('pourQui');
+            
+            typeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    typeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentType = btn.dataset.type;
+
+                    if (currentType === 'cadeaux') {
+                        pourQuiField.classList.add('show');
+                        pourQuiInput.required = true;
+                    } else {
+                        pourQuiField.classList.remove('show');
+                        pourQuiInput.required = false;
+                        pourQuiInput.value = '';
+                    }
+                });
+            });
+        }
+
+        // ============================================================================
+        // CHARGEMENT DES DONNÉES
+        // ============================================================================
+
+        async function loadAllData() {
+            await loadTotals();
+            await loadExpenses();
+            updateExpensesDisplay();
+        }
+
+        async function loadTotals() {
+            try {
+                const repasResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEETS.repas}!D:D`,
+                });
+                const repasValues = repasResponse.result.values || [];
+                if (repasValues.length > 1) {
+                    const lastTotal = repasValues[repasValues.length - 1][0];
+                    totals.repas = parseFloat(lastTotal.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+                }
+
+                const cadeauxResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEETS.cadeaux}!D:D`,
+                });
+                const cadeauxValues = cadeauxResponse.result.values || [];
+                if (cadeauxValues.length > 1) {
+                    const lastTotal = cadeauxValues[cadeauxValues.length - 1][0];
+                    totals.cadeaux = parseFloat(lastTotal.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+                }
+
+                updateTotalDisplay();
+            } catch (error) {
+                console.error('Erreur lors du chargement des totaux:', error);
+            }
+        }
+
+        async function loadExpenses() {
+            try {
+                const repasResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEETS.repas}!A2:E`,
+                });
+                const repasValues = repasResponse.result.values || [];
+                expenses.repas = repasValues.map(row => ({
+                    achat: row[0] || '',
+                    date: row[1] || '',
+                    montant: row[2] || '',
+                    total: row[3] || '',
+                    extra: row[4] || ''
+                })).filter(exp => exp.achat);
+
+                const cadeauxResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${CONFIG.SHEETS.cadeaux}!A2:E`,
+                });
+                const cadeauxValues = cadeauxResponse.result.values || [];
+                expenses.cadeaux = cadeauxValues.map(row => ({
+                    achat: row[0] || '',
+                    date: row[1] || '',
+                    montant: row[2] || '',
+                    total: row[3] || '',
+                    extra: row[4] || ''
+                })).filter(exp => exp.achat);
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des dépenses:', error);
+            }
+        }
+
+        // ============================================================================
+        // AFFICHAGE DES DÉPENSES
+        // ============================================================================
+
+        function updateExpensesDisplay() {
+            const expensesList = document.getElementById('expensesList');
+            const expensesTitle = document.getElementById('expensesTitle');
+            const currentExpenses = expenses[currentView];
+
+            if (currentView === 'repas') {
+                expensesTitle.textContent = '📋 Dépenses Repas';
+            } else {
+                expensesTitle.textContent = '📋 Dépenses Cadeaux';
+            }
+
+            if (!gapi.client.getToken()) {
+                expensesList.innerHTML = '<div class="loading">Connectez-vous pour voir vos dépenses...</div>';
+                return;
+            }
+
+            if (currentExpenses.length === 0) {
+                expensesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">${currentView === 'repas' ? '🍽️' : '🎁'}</div>
+                        <p>Aucune dépense enregistrée</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = currentExpenses.map(expense => {
+                const extraIcon = currentView === 'repas' ? '👥' : '🎁';
+                const extraLabel = currentView === 'repas' ? 'Coût/pers' : 'Pour';
+                
+                return `
+                    <div class="expense-item">
+                        <div class="expense-header">
+                            <div class="expense-title">${expense.achat}</div>
+                            <div class="expense-amount">${expense.montant}</div>
+                        </div>
+                        <div class="expense-details">
+                            <div class="expense-date">
+                                📅 ${expense.date}
+                            </div>
+                            <div class="expense-extra">
+                                ${extraIcon} ${extraLabel}: ${expense.extra}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).reverse().join('');
+
+            expensesList.innerHTML = html;
+        }
+
+        // ============================================================================
+        // GESTION DU FORMULAIRE
+        // ============================================================================
+
+        function setupForm() {
+            const form = document.getElementById('expenseForm');
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (gapi.client.getToken() === null) {
+                    showMessage('❌ Veuillez vous connecter à Google Sheets d\'abord', 'error');
+                    return;
+                }
+
+                const achat = document.getElementById('achat').value;
+                const date = document.getElementById('date').value;
+                const montant = parseFloat(document.getElementById('montant').value);
+                const pourQui = document.getElementById('pourQui').value;
+
+                if (!achat || !date || isNaN(montant)) {
+                    showMessage('❌ Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                if (currentType === 'cadeaux' && !pourQui) {
+                    showMessage('❌ Veuillez indiquer pour qui est ce cadeau', 'error');
+                    return;
+                }
+
+                await addExpense(achat, date, montant, pourQui);
+            });
+        }
+
+        // ============================================================================
+        // AJOUT D'UNE DÉPENSE
+        // ============================================================================
+
+        async function addExpense(achat, dateStr, montant, pourQui) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Ajout en cours...';
+
+            try {
+                const [year, month, day] = dateStr.split('-');
+                const formattedDate = `${day}/${month}/${year}`;
+
+                totals[currentType] += montant;
+                const newTotal = totals[currentType];
+
+                let values;
+                let sheetName = CONFIG.SHEETS[currentType];
+
+                if (currentType === 'repas') {
+                    const coutParPersonne = newTotal / CONFIG.NB_PERSONNES;
+                    values = [[
+                        achat,
+                        formattedDate,
+                        `${montant.toFixed(2).replace('.', ',')} €`,
+                        `${newTotal.toFixed(2).replace('.', ',')} €`,
+                        `${coutParPersonne.toFixed(2).replace('.', ',')} €`
+                    ]];
+                } else {
+                    values = [[
+                        achat,
+                        formattedDate,
+                        `${montant.toFixed(2).replace('.', ',')} €`,
+                        `${newTotal.toFixed(2).replace('.', ',')} €`,
+                        pourQui
+                    ]];
+                }
+
+                await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `${sheetName}!A:E`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: { values: values }
+                });
+
+                updateTotalDisplay();
+                await loadExpenses();
+                updateExpensesDisplay();
+                
+                const sheetLabel = currentType === 'repas' ? 'Courses réveillon' : 'Cadeaux';
+                showMessage(`✅ Dépense ajoutée avec succès dans "${sheetLabel}" !`, 'success');
+                
+                document.getElementById('expenseForm').reset();
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('date').value = today;
+
+            } catch (error) {
+                console.error('Erreur lors de l\'ajout:', error);
+                showMessage('❌ Erreur lors de l\'ajout de la dépense: ' + error.message, 'error');
+                totals[currentType] -= montant;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '➕ Ajouter la dépense';
+            }
+        }
+
+        // ============================================================================
+        // INTERFACE UTILISATEUR
+        // ============================================================================
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 5000);
+        }
+
+        function updateTotalDisplay() {
+            document.getElementById('repasTotal').textContent = 
+                totals.repas.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('cadeauxTotal').textContent = 
+                totals.cadeaux.toFixed(2).replace('.', ',') + ' €';
+        }
+    </script>
+</body>
+</html>
